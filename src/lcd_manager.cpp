@@ -17,6 +17,7 @@ String LCDManager::currentRawText = "";
 String LCDManager::parsedText = "";
 bool LCDManager::shouldScroll = false;
 bool LCDManager::centerText = false;
+int LCDManager::lcdMode = 0;
 
 unsigned long LCDManager::lastScrollTime = 0;
 int LCDManager::scrollIndexRow0 = 0;
@@ -144,9 +145,19 @@ void LCDManager::playWelcomeAnimation() {
 void LCDManager::handle() {
     if (!lcdFound) return;
     
-    // Update scrolling if enabled
-    if (shouldScroll) {
-        updateScrolling();
+    if (lcdMode == 0) {
+        // Update scrolling if enabled
+        if (shouldScroll) {
+            updateScrolling();
+        }
+    } else {
+        // Live mode updates every 1 second
+        static unsigned long lastModeUpdate = 0;
+        unsigned long now = millis();
+        if (now - lastModeUpdate >= 1000) {
+            lastModeUpdate = now;
+            updateLiveMode();
+        }
     }
 }
 
@@ -159,6 +170,15 @@ uint8_t LCDManager::getLcdAddress() {
 }
 
 String LCDManager::getCurrentText() {
+    if (lcdFound) {
+        if (lcdMode == 1) {
+            return "Time: " + TimeManager::getFormattedTimeOnly() + "\nDate: " + TimeManager::getFormattedDateOnly();
+        } else if (lcdMode == 2) {
+            return "HN: " + WiFiManager::getHostname().substring(0, 12) + "\nIP: " + WiFiManager::getIP();
+        } else if (lcdMode == 3) {
+            return "SSID: " + WiFiManager::getSSID().substring(0, 10) + "\nSig: " + String(WiFiManager::getRSSI()) + " dBm";
+        }
+    }
     return currentRawText;
 }
 
@@ -172,6 +192,7 @@ bool LCDManager::getDisplayState() {
 
 void LCDManager::clear() {
     if (!lcdFound) return;
+    lcdMode = 0; // Reset to custom text mode
     lcd->clear();
     currentRawText = "";
     line0 = "";
@@ -249,6 +270,7 @@ String LCDManager::parseEmojis(const String& input) {
 void LCDManager::printText(const String& text, bool center, bool scroll) {
     if (!lcdFound) return;
     
+    lcdMode = 0; // Reset to custom text mode
     currentRawText = text;
     centerText = center;
     shouldScroll = scroll;
@@ -335,25 +357,38 @@ void LCDManager::updateScrolling() {
 }
 
 void LCDManager::showSystemInfo(int mode) {
+    setMode(mode);
+}
+
+void LCDManager::setMode(int mode) {
     if (!lcdFound) return;
-    
-    lcd->clear();
-    shouldScroll = false;
-    
-    if (mode == 1) { // Time Mode
+    lcdMode = mode;
+    if (mode > 0) {
+        lcd->clear();
+        updateLiveMode();
+    }
+}
+
+int LCDManager::getMode() {
+    return lcdMode;
+}
+
+void LCDManager::updateLiveMode() {
+    if (!lcdFound) return;
+    if (lcdMode == 1) { // Time Mode
         lcd->setCursor(0, 0);
-        lcd->print("Time: " + TimeManager::getFormattedTimeOnly());
+        lcd->print("Time: " + TimeManager::getFormattedTimeOnly() + "   ");
         lcd->setCursor(0, 1);
-        lcd->print("Date: " + TimeManager::getFormattedDateOnly());
-    } else if (mode == 2) { // IP Mode
+        lcd->print("Date: " + TimeManager::getFormattedDateOnly() + "   ");
+    } else if (lcdMode == 2) { // IP Mode
         lcd->setCursor(0, 0);
-        lcd->print("Hostname: " + WiFiManager::getHostname());
+        lcd->print("HN: " + WiFiManager::getHostname().substring(0, 12) + "    ");
         lcd->setCursor(0, 1);
-        lcd->print("IP: " + WiFiManager::getIP());
-    } else if (mode == 3) { // RSSI Mode
+        lcd->print("IP: " + WiFiManager::getIP() + "      ");
+    } else if (lcdMode == 3) { // RSSI Mode
         lcd->setCursor(0, 0);
-        lcd->print("SSID: " + WiFiManager::getSSID().substring(0, 10));
+        lcd->print("SSID: " + WiFiManager::getSSID().substring(0, 10) + "      ");
         lcd->setCursor(0, 1);
-        lcd->print("Signal: " + String(WiFiManager::getRSSI()) + " dBm");
+        lcd->print("Sig: " + String(WiFiManager::getRSSI()) + " dBm   ");
     }
 }

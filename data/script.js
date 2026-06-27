@@ -195,6 +195,19 @@ function handleWsPayload(payload) {
         return;
     }
     
+    if (payload.type === 'lcd_mode_update') {
+        if (payload.mode > 0) {
+            lcdInput.placeholder = "LCD is displaying Live " + (payload.mode === 1 ? "Clock" : (payload.mode === 2 ? "System Info" : "WiFi Info")) + "...";
+            if (!isTyping) {
+                lcdInput.value = "";
+                charCounter.textContent = "0 / 32";
+            }
+        } else {
+            lcdInput.placeholder = "Type message here (Max 32 chars)...";
+        }
+        return;
+    }
+    
     // 5. If it's a telemetry broadcast, update Bento Grid
     if (payload.heapFree !== undefined) {
         updateTelemetryDashboard(payload);
@@ -225,9 +238,24 @@ function setupLcdInput() {
     });
     
     // Quick buttons
-    document.getElementById('btn-quick-time').addEventListener('click', () => triggerQuickAction('/api/text', 'text=' + encodeURIComponent('❤️ Live Time ❤️\n' + liveTimeLabel.textContent)));
-    document.getElementById('btn-quick-ip').addEventListener('click', () => triggerQuickAction('/api/text', 'text=' + encodeURIComponent('IP Address:\n' + document.getElementById('net-ip').textContent)));
-    document.getElementById('btn-quick-rssi').addEventListener('click', () => triggerQuickAction('/api/text', 'text=' + encodeURIComponent('WiFi Strength:\n' + document.getElementById('val-rssi').textContent)));
+    document.getElementById('btn-quick-time').addEventListener('click', () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "mode", mode: 1 }));
+            showToast("LCD Mode: Live Clock");
+        }
+    });
+    document.getElementById('btn-quick-ip').addEventListener('click', () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "mode", mode: 2 }));
+            showToast("LCD Mode: Live System Info");
+        }
+    });
+    document.getElementById('btn-quick-rssi').addEventListener('click', () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "mode", mode: 3 }));
+            showToast("LCD Mode: Live WiFi Info");
+        }
+    });
     
     btnClearLcd.addEventListener('click', () => {
         lcdInput.value = "";
@@ -382,6 +410,22 @@ function updateTelemetryDashboard(data) {
     document.getElementById('net-subnet').textContent = data.subnet;
     document.getElementById('net-dns').textContent = data.dns;
     document.getElementById('net-clients').textContent = data.clients;
+    
+    // LCD Live Mode Text Synchronization
+    if (data.lcdText !== undefined && !isTyping) {
+        if (data.lcdMode > 0) {
+            lcdInput.placeholder = "LCD is displaying Live " + (data.lcdMode === 1 ? "Clock" : (data.lcdMode === 2 ? "System Info" : "WiFi Info")) + "...";
+            if (lcdInput.value !== "") {
+                lcdInput.value = "";
+                charCounter.textContent = "0 / 32";
+            }
+        } else {
+            lcdInput.placeholder = "Type message here (Max 32 chars)...";
+            lcdInput.value = data.lcdText;
+            charCounter.textContent = `${data.lcdText.length} / 32`;
+        }
+        updateLcdEmulator(data.lcdText, data.lcdMode === 0 ? chkCenter.checked : false);
+    }
 }
 
 // ==========================================

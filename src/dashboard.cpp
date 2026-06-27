@@ -93,6 +93,7 @@ String Dashboard::getTelemetryJson(int connectedClients) {
     doc["lcdConnected"] = LCDManager::isLcdConnected();
     doc["lcdBacklight"] = LCDManager::getBacklightState();
     doc["lcdDisplay"] = LCDManager::getDisplayState();
+    doc["lcdMode"] = LCDManager::getMode();
     
     // Clean string serialization to prevent JSON parser breakages
     String rawText = LCDManager::getCurrentText();

@@ -117,6 +117,10 @@ void WebServerManager::handleWsMessage(AsyncWebSocketClient* client, const Strin
         bool state = doc["state"];
         LCDManager::setDisplay(state);
         ws.textAll("{\"type\":\"display_update\",\"state\":" + String(state ? "true" : "false") + "}");
+    } else if (type == "mode") {
+        int mode = doc["mode"];
+        LCDManager::setMode(mode);
+        ws.textAll("{\"type\":\"lcd_mode_update\",\"mode\":" + String(mode) + "}");
     }
 }
 

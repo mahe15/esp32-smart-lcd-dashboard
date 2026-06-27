@@ -22,6 +22,8 @@ public:
     static void setBacklight(bool on);
     static void setDisplay(bool on);
     static void setCursorBlink(bool blink);
+    static void setMode(int mode);
+    static int getMode();
     
     // Quick Actions
     static void showSystemInfo(int mode); // 1: Time, 2: IP, 3: RSSI
@@ -46,6 +48,9 @@ private:
     static String parsedText;
     static bool shouldScroll;
     static bool centerText;
+    
+    static int lcdMode;
+    static void updateLiveMode();
     
     // Software scrolling state
     static unsigned long lastScrollTime;

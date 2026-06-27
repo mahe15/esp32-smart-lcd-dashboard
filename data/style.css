@@ -4,7 +4,7 @@
 
 :root {
     --accent: #00F2FE;
-    --accent-glow: rgba(0, 242, 254, 0.35);
+    --accent-glow: transparent;
     --bg-base: #080c14;
     --bg-glass: rgba(13, 20, 35, 0.6);
     --bg-glass-hover: rgba(20, 30, 50, 0.7);
@@ -62,17 +62,7 @@ body {
 }
 
 .bg-glow {
-    position: absolute;
-    top: -10%;
-    left: 30%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-    z-index: -1;
-    filter: blur(80px);
-    pointer-events: none;
-    opacity: 0.4;
-    animation: rotateGlow 25s infinite linear;
+    display: none;
 }
 
 @keyframes rotateGlow {
@@ -112,7 +102,6 @@ body {
     width: 32px;
     height: 32px;
     color: var(--accent);
-    filter: drop-shadow(0 0 8px var(--accent-glow));
 }
 
 .brand h2 {
@@ -163,7 +152,6 @@ body {
     background: var(--accent);
     color: var(--text-inverse);
     font-weight: 600;
-    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 .nav-btn.active svg {
@@ -192,7 +180,6 @@ body {
 
 .connected .pulse-dot {
     background-color: var(--success);
-    box-shadow: 0 0 8px var(--success);
     animation: pulse 1.5s infinite alternate;
 }
 
@@ -242,8 +229,7 @@ body {
 
 .time-badge {
     color: var(--accent);
-    border-color: var(--accent-glow);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.1);
+    border-color: var(--accent);
 }
 
 /* Cards System */
@@ -251,8 +237,8 @@ body {
     background: var(--bg-glass);
     border: 1px solid var(--border-glass);
     border-radius: 16px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
 .glass:hover {
@@ -274,10 +260,9 @@ body {
 }
 
 .lcd-glow-wrap {
-    padding: 4px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), #7facfe);
-    box-shadow: 0 0 20px var(--accent-glow);
+    padding: 1px;
+    border-radius: 9px;
+    background: var(--border-glass);
 }
 
 .lcd-screen {
@@ -288,7 +273,6 @@ body {
     font-weight: 700;
     font-size: 1.8rem;
     color: #00F2FE;
-    text-shadow: 0 0 8px rgba(0, 242, 254, 0.6);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -378,12 +362,11 @@ body {
     height: 100%;
     background: var(--accent);
     border-radius: 3px;
-    box-shadow: 0 0 8px var(--accent-glow);
     transition: width 0.5s ease;
 }
 
-#bar-rssi { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
-#bar-heap { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+#bar-rssi { background: #10b981; }
+#bar-heap { background: #f59e0b; }
 
 .card-body p {
     font-size: 0.85rem;
@@ -457,12 +440,10 @@ body {
     background: var(--accent);
     color: var(--text-inverse);
     border: none;
-    box-shadow: 0 4px 12px var(--accent-glow);
 }
 
 .btn-primary:hover {
     background: #00d9e5;
-    box-shadow: 0 6px 16px var(--accent-glow);
 }
 
 .btn-danger {
@@ -519,7 +500,6 @@ body {
 
 .input-glow-wrapper:focus-within {
     border-color: var(--accent);
-    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 textarea {
@@ -810,7 +790,7 @@ textarea {
     border-radius: 30px;
     font-weight: 600;
     font-size: 0.9rem;
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 100;
     transform: translateY(100px);
     opacity: 0;
@@ -824,7 +804,7 @@ textarea {
 
 .toast.error {
     background: rgba(239, 68, 68, 0.9);
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive configurations */
