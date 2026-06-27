@@ -97,6 +97,7 @@ void WebServerManager::handleWsMessage(AsyncWebSocketClient* client, const Strin
         trimmedText.trim();
         if (isDone && trimmedText.length() > 0) {
             Storage::addHistoryItem(trimmedText, "Web Interface");
+            ws.textAll("{\"type\":\"history_update\"}");
         }
         
         // Broadcast update to all clients except sender to keep cursor/typing sync
@@ -225,6 +226,7 @@ void WebServerManager::setupRoutes() {
         
         // Broadcast telemetry update
         ws.textAll("{\"type\":\"lcd_update\",\"text\":\"" + text + "\",\"center\":" + (center ? "true" : "false") + ",\"scroll\":" + (scroll ? "true" : "false") + "}");
+        ws.textAll("{\"type\":\"history_update\"}");
         
         request->send(200, "application/json", "{\"status\":\"success\",\"message\":\"LCD text updated\"}");
         Logger::logRequest(request->client()->remoteIP().toString().c_str(), "/api/text", millis() - start, ESP.getFreeHeap(), 200);
@@ -240,6 +242,7 @@ void WebServerManager::setupRoutes() {
         
         if (clearHistory) {
             Storage::clearHistory();
+            ws.textAll("{\"type\":\"history_update\"}");
             request->send(200, "application/json", "{\"status\":\"success\",\"message\":\"History cleared\"}");
         } else {
             LCDManager::clear();
@@ -271,6 +274,7 @@ void WebServerManager::setupRoutes() {
                 free(request->_tempObject);
                 request->_tempObject = NULL;
                 if (success) {
+                    ws.textAll("{\"type\":\"history_update\"}");
                     request->send(200, "application/json", "{\"status\":\"success\",\"message\":\"History imported\"}");
                 } else {
                     request->send(400, "application/json", "{\"status\":\"error\",\"message\":\"Failed to import history\"}");
@@ -320,6 +324,7 @@ void WebServerManager::setupRoutes() {
         if (request->hasParam("dns", true)) settings.dns = request->getParam("dns", true)->value();
         
         Storage::saveSettings(settings);
+        ws.textAll("{\"type\":\"settings_update\"}");
         request->send(200, "application/json", "{\"status\":\"success\",\"message\":\"Settings updated successfully\"}");
         Logger::logRequest(request->client()->remoteIP().toString().c_str(), "/api/settings", millis() - start, ESP.getFreeHeap(), 200);
     });

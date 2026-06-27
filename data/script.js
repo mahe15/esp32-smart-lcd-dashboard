@@ -96,9 +96,11 @@ function setupNavigation() {
 
 function startClock() {
     setInterval(() => {
-        const now = new Date();
-        liveTimeLabel.textContent = now.toLocaleTimeString();
-        liveDateLabel.textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            const now = new Date();
+            liveTimeLabel.textContent = now.toLocaleTimeString();
+            liveDateLabel.textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        }
     }, 1000);
 }
 
@@ -151,6 +153,16 @@ function handleWsPayload(payload) {
     if (payload.type === 'logs') {
         consoleOutput.innerHTML = "";
         payload.data.forEach(line => addConsoleLine(line));
+        return;
+    }
+    
+    // 2.5 Check for real-time history and configuration updates
+    if (payload.type === 'history_update') {
+        loadHistory();
+        return;
+    }
+    if (payload.type === 'settings_update') {
+        loadDeviceConfigsToForm();
         return;
     }
     
@@ -308,6 +320,14 @@ function triggerQuickAction(url, body) {
 // 4. TELEMETRY & BENTO CARD RENDERING
 // ==========================================
 function updateTelemetryDashboard(data) {
+    // Update live NTP Time and Date from ESP32
+    if (data.time) {
+        liveTimeLabel.textContent = data.time;
+    }
+    if (data.date) {
+        liveDateLabel.textContent = data.date;
+    }
+    
     // Heap Memory
     const heapKB = Math.round(data.heapFree / 1024);
     const minHeapKB = Math.round(data.heapMin / 1024);
