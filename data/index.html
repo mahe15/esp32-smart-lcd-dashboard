@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#00F2FE">
+    <title>ESP32 Smart LCD Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body class="dark-theme">
+    <div class="bg-gradient"></div>
+    <div class="bg-glow"></div>
+    
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <svg class="brand-icon" viewBox="0 0 24 24">
+                    <rect x="2" y="4" width="20" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <line x1="2" y1="14" x2="22" y2="14" stroke="currentColor" stroke-width="2"/>
+                    <path d="M6 19v2M18 19v2M9 19h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h2>Smart LCD</h2>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-tab="home">
+                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-btn" data-tab="control">
+                    <svg viewBox="0 0 24 24"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z" fill="currentColor"/></svg>
+                    <span>LCD Control</span>
+                </button>
+                <button class="nav-btn" data-tab="history">
+                    <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 7 7 7.07 7.07 0 0 1-6-3H4.82A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" fill="currentColor"/></svg>
+                    <span>History</span>
+                </button>
+                <button class="nav-btn" data-tab="logs">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2zm0 8H7v-2h10v2z" fill="currentColor"/></svg>
+                    <span>System Logs</span>
+                </button>
+                <button class="nav-btn" data-tab="settings">
+                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" fill="currentColor"/></svg>
+                    <span>Settings</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-indicator connected">
+                    <span class="pulse-dot"></span>
+                    <span id="conn-status-text">Connected</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-bar">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="top-bar-actions">
+                    <span class="date-badge" id="live-date">---</span>
+                    <span class="time-badge" id="live-time">00:00:00</span>
+                    <button class="icon-btn" id="install-btn" style="display: none;">
+                        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z" fill="currentColor"/></svg>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Tab Contents -->
+            
+            <!-- TAB: HOME / TELEMETRY -->
+            <section class="tab-panel active" id="tab-home">
+                <!-- Hero LCD Emulator -->
+                <div class="lcd-emulator-card glass">
+                    <div class="lcd-glow-wrap">
+                        <div class="lcd-screen" id="emulator-screen">
+                            <div class="lcd-line" id="lcd-line-0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                            <div class="lcd-line" id="lcd-line-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                        </div>
+                    </div>
+                    <div class="lcd-details">
+                        <span class="lcd-tag">LIVE LCD EMULATOR</span>
+                        <div class="lcd-controls-quick">
+                            <button class="btn btn-secondary btn-sm" id="btn-quick-time">Show Time</button>
+                            <button class="btn btn-secondary btn-sm" id="btn-quick-ip">Show IP</button>
+                            <button class="btn btn-secondary btn-sm" id="btn-quick-rssi">Show RSSI</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Telemetry Bento Grid -->
+                <div class="grid-layout">
+                    <!-- WiFi Signal -->
+                    <div class="card glass status-card">
+                        <div class="card-header">
+                            <h3>WiFi Status</h3>
+                            <div class="card-icon wifi-glow">
+                                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 21l-12-12c2.9-2.9 6.82-4.5 11-4.5s8.1 1.6 11 4.5l-10 12z" fill="currentColor"/></svg>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h2 id="val-rssi">-- dBm</h2>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-bar" id="bar-rssi" style="width: 0%"></div>
+                            </div>
+                            <p id="val-ssid">SSID: ---</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Heap Memory -->
+                    <div class="card glass status-card">
+                        <div class="card-header">
+                            <h3>Heap Memory</h3>
+                            <div class="card-icon heap-glow">
+                                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/></svg>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h2 id="val-heap">-- KB</h2>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-bar" id="bar-heap" style="width: 0%"></div>
+                            </div>
+                            <p id="val-min-heap">Min Free: -- KB</p>
+                        </div>
+                    </div>
+                    
+                    <!-- CPU & Temperature -->
+                    <div class="card glass status-card">
+                        <div class="card-header">
+                            <h3>System Core</h3>
+                            <div class="card-icon cpu-glow">
+                                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M22 9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3h-2v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2V9zm-4 8H6V6h12v11z" fill="currentColor"/></svg>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h2 id="val-temp">-- °C</h2>
+                            <p id="val-cpu">Frequency: -- MHz</p>
+                            <p id="val-uptime">Uptime: 0s</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Hardware Spec Summary -->
+                    <div class="card glass double-width-card">
+                        <div class="card-header">
+                            <h3>Hardware Details</h3>
+                        </div>
+                        <div class="card-body flex-list">
+                            <div class="list-item"><span>Chip Model</span><strong id="info-model">---</strong></div>
+                            <div class="list-item"><span>Revision</span><strong id="info-revision">--</strong></div>
+                            <div class="list-item"><span>Flash Storage</span><strong id="info-flash">-- MB</strong></div>
+                            <div class="list-item"><span>SDK Version</span><strong id="info-sdk">---</strong></div>
+                            <div class="list-item"><span>MAC Address</span><strong id="info-mac">--:--:--:--:--:--</strong></div>
+                            <div class="list-item"><span>Boot Count</span><strong id="info-boots">0</strong></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Connection Details -->
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h3>Network Profile</h3>
+                        </div>
+                        <div class="card-body flex-list">
+                            <div class="list-item"><span>Hostname</span><strong id="net-hostname">---</strong></div>
+                            <div class="list-item"><span>IP Address</span><strong id="net-ip">0.0.0.0</strong></div>
+                            <div class="list-item"><span>Gateway</span><strong id="net-gateway">0.0.0.0</strong></div>
+                            <div class="list-item"><span>Subnet Mask</span><strong id="net-subnet">0.0.0.0</strong></div>
+                            <div class="list-item"><span>DNS Server</span><strong id="net-dns">0.0.0.0</strong></div>
+                            <div class="list-item"><span>Active Clients</span><strong id="net-clients">0</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- TAB: CONTROL / VOICE TYPING -->
+            <section class="tab-panel" id="tab-control">
+                <div class="card glass control-card">
+                    <div class="card-header">
+                        <h2>Live LCD Keyboard</h2>
+                        <span class="badge" id="char-counter">0 / 32</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-glow-wrapper">
+                            <textarea id="lcd-input" maxlength="32" placeholder="Type message here (Max 32 chars)..." rows="2"></textarea>
+                        </div>
+                        
+                        <div class="control-toggles">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-center">
+                                <span class="slider"></span>
+                                <span class="toggle-label">Center Text</span>
+                            </label>
+                            
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-scroll" checked>
+                                <span class="slider"></span>
+                                <span class="toggle-label">Auto Scroll</span>
+                            </label>
+                            
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-backlight" checked>
+                                <span class="slider"></span>
+                                <span class="toggle-label">Backlight</span>
+                            </label>
+                            
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-display" checked>
+                                <span class="slider"></span>
+                                <span class="toggle-label">Display Enable</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Voice Typing & Quick clear buttons -->
+                        <div class="button-row">
+                            <button class="btn btn-primary btn-icon" id="btn-voice">
+                                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z" fill="currentColor"/></svg>
+                                <span id="voice-btn-text">Start Voice Input</span>
+                            </button>
+                            <button class="btn btn-danger" id="btn-clear-lcd">Clear Display</button>
+                        </div>
+                        
+                        <!-- Emoji Picker panel -->
+                        <div class="emoji-picker-container">
+                            <h3>Insert LCD Icons / Emojis</h3>
+                            <div class="emoji-grid">
+                                <button class="emoji-btn" data-emoji="❤️">❤️ <small>(Heart)</small></button>
+                                <button class="emoji-btn" data-emoji="👍">👍 <small>(Like)</small></button>
+                                <button class="emoji-btn" data-emoji="😊">😊 <small>(Smile)</small></button>
+                                <button class="emoji-btn" data-emoji="🔥">🔥 <small>(Fire)</small></button>
+                                <button class="emoji-btn" data-emoji="⭐">⭐ <small>(Star)</small></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- TAB: HISTORY -->
+            <section class="tab-panel" id="tab-history">
+                <div class="card glass history-card">
+                    <div class="card-header flex-header">
+                        <h2>LCD Message History</h2>
+                        <div class="search-wrap">
+                            <input type="text" id="history-search" placeholder="Search saved messages...">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="history-actions">
+                            <button class="btn btn-secondary btn-sm" id="btn-export-history">Export JSON</button>
+                            <label class="btn btn-secondary btn-sm file-upload-label">
+                                Import JSON
+                                <input type="file" id="import-history-file" accept=".json" style="display: none;">
+                            </label>
+                            <button class="btn btn-danger btn-sm" id="btn-clear-history">Clear History</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Message</th>
+                                        <th>Sender</th>
+                                        <th>Timestamp</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body">
+                                    <tr>
+                                        <td colspan="4" class="text-center">Loading history items...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- TAB: SYSTEM LOGS -->
+            <section class="tab-panel" id="tab-logs">
+                <div class="card glass logs-card">
+                    <div class="card-header flex-header">
+                        <h2>Live Telemetry & Logs Stream</h2>
+                        <div class="logs-actions">
+                            <button class="btn btn-secondary btn-sm" id="btn-clear-logs">Clear Screen</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="console-box" id="console-output">
+                            <div class="console-line system">[SYSTEM] Web interface connected to log terminal stream...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- TAB: SETTINGS -->
+            <section class="tab-panel" id="tab-settings">
+                <div class="settings-grid">
+                    <!-- General Settings -->
+                    <div class="card glass">
+                        <div class="card-header"><h2>UI Preferences</h2></div>
+                        <div class="card-body">
+                            <form id="ui-settings-form">
+                                <div class="form-group">
+                                    <label>Theme Mode</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="themeMode" value="dark" checked>
+                                            <span>Dark Mode</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="themeMode" value="light">
+                                            <span>Light Mode</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="accentColor">Accent Color</label>
+                                    <div class="color-picker-wrap">
+                                        <input type="color" id="accentColor" name="accentColor" value="#00F2FE">
+                                        <span id="color-hex-label">#00F2FE</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" name="notifs" id="set-notifs" checked>
+                                        <span class="slider"></span>
+                                        <span class="toggle-label">Enable Browser Notifications</span>
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Hardware Settings -->
+                    <div class="card glass">
+                        <div class="card-header"><h2>Device Configurations</h2></div>
+                        <div class="card-body">
+                            <form id="device-settings-form">
+                                <div class="form-group">
+                                    <label for="set-hostname">mDNS Hostname</label>
+                                    <input type="text" id="set-hostname" name="hostname" placeholder="esp32-lcd">
+                                    <small>Access dashboard at http://&lt;hostname&gt;.local</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="set-scrollSpeed">Auto Scroll Delay (ms)</label>
+                                    <input type="number" id="set-scrollSpeed" name="scrollSpeed" min="50" max="2000" step="50" value="250">
+                                </div>
+                                <div class="form-group">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" name="is24Hour" id="set-is24Hour">
+                                        <span class="slider"></span>
+                                        <span class="toggle-label">24-Hour Time Format</span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="set-timezone">Timezone Offset (Seconds)</label>
+                                    <select id="set-timezone" name="timezoneOffset">
+                                        <option value="-36000">GMT-10:00 (Hawaii)</option>
+                                        <option value="-28800">GMT-08:00 (Pacific Time)</option>
+                                        <option value="-18000">GMT-05:00 (Eastern Time)</option>
+                                        <option value="0">GMT+00:00 (London, UTC)</option>
+                                        <option value="3600">GMT+01:00 (Paris, Rome)</option>
+                                        <option value="19800" selected>GMT+05:30 (India, Mumbai)</option>
+                                        <option value="28800">GMT+08:00 (Singapore, Beijing)</option>
+                                        <option value="32400">GMT+09:00 (Tokyo, Seoul)</option>
+                                        <option value="36000">GMT+10:00 (Sydney)</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn btn-primary" id="btn-save-device-settings">Save Configurations</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Network & Wi-Fi Profiles -->
+                    <div class="card glass double-width-card">
+                        <div class="card-header"><h2>Wi-Fi Credentials & IP Addressing</h2></div>
+                        <div class="card-body">
+                            <form id="wifi-settings-form" class="settings-wifi-form">
+                                <div class="wifi-sta-params">
+                                    <div class="form-group">
+                                        <label for="set-wifiSsid">Wi-Fi Network Name (SSID)</label>
+                                        <input type="text" id="set-wifiSsid" name="wifiSsid" placeholder="Current WiFi SSID">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="set-wifiPass">Password</label>
+                                        <input type="password" id="set-wifiPass" name="wifiPass" placeholder="••••••••">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" name="useStaticIp" id="set-useStaticIp">
+                                        <span class="slider"></span>
+                                        <span class="toggle-label">Use Static IP Configurations</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="wifi-static-params" id="static-ip-fields" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="set-staticIp">Static IP</label>
+                                        <input type="text" id="set-staticIp" name="staticIp" placeholder="192.168.1.150">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="set-gateway">Gateway</label>
+                                        <input type="text" id="set-gateway" name="gateway" placeholder="192.168.1.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="set-subnet">Subnet Mask</label>
+                                        <input type="text" id="set-subnet" name="subnet" placeholder="255.255.255.0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="set-dns">DNS</label>
+                                        <input type="text" id="set-dns" name="dns" placeholder="8.8.8.8">
+                                    </div>
+                                </div>
+                                
+                                <div class="button-row-settings">
+                                    <button type="button" class="btn btn-primary" id="btn-save-wifi-settings">Update WiFi Configs</button>
+                                    <button type="button" class="btn btn-danger" id="btn-reboot-esp">Reboot ESP32</button>
+                                    <a href="/update" class="btn btn-secondary text-center" target="_blank">Access OTA Update</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Speech Recognition Toast -->
+    <div id="toast" class="toast">Voice recognition active...</div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

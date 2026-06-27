@@ -1,0 +1,24 @@
+{
+  "short_name": "Smart LCD",
+  "name": "ESP32 Smart LCD Dashboard",
+  "description": "Premium real-time dashboard and keyboard input controller for ESP32 LCD Displays.",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#080c14",
+  "theme_color": "#00F2FE",
+  "display": "standalone",
+  "orientation": "any"
+}

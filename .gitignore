@@ -1,0 +1,21 @@
+# PlatformIO build files
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Editor / IDE configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Compilation databases
+compile_commands.json
+.clang_complete
+.gcc-flags.json
+
+# Local config overrides
+config_local.h
